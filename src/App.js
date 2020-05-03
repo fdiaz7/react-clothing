@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 import HomePage from './pages/homepage/HomePage';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import ShopPage from './pages/shops/Shop.jsx';
 import Header from './components/header/Header';
 import SignInAndSignUp from './pages/sign-in-sign-up/SignInAndSignUp.jsx';
-import { auth } from './firebase/firebase.util';
+import { auth, createUserProfileDocument } from './firebase/firebase.util';
 
-function onAuthStateChange(callback) {
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log(user);
-      callback({ currentUser: { ...user } });
+import { useSelector, useDispatch } from 'react-redux';
+import * as userActions from './redux/user/user.actions';
+
+function onAuthStateChange(callback, action) {
+  auth.onAuthStateChanged(async (userAuth) => {
+    if (userAuth) {
+      const userRef = await createUserProfileDocument(userAuth);
+      userRef.onSnapshot((snapShot) => {
+        callback(action({ id: snapShot.id, ...snapShot.data() }));
+      });
     } else {
       callback(null);
     }
@@ -20,22 +25,30 @@ function onAuthStateChange(callback) {
 }
 
 const App = () => {
-  const [userObj, setUserObj] = useState(null);
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(setUserObj);
+    const unsubscribe = onAuthStateChange(dispatch, userActions.setCurrentUser);
+
     return () => {
       unsubscribe();
     };
   }, []);
-  console.log(userObj);
+
   return (
     <div>
-      <Header currentUser={userObj} />
+      <Header />
       <Switch>
         <Route exact path='/' component={HomePage} />
         <Route exact path='/shop' component={ShopPage} />
-        <Route exact path='/signin' component={SignInAndSignUp} />
+        <Route
+          exact
+          path='/signin'
+          render={() =>
+            currentUser ? <Redirect to='/' /> : <SignInAndSignUp />
+          }
+        />
       </Switch>
     </div>
   );
