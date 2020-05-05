@@ -5,6 +5,7 @@ import HomePage from './pages/homepage/HomePage';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import ShopPage from './pages/shops/Shop.jsx';
 import Header from './components/header/Header';
+import CheckoutPage from './pages/checkoutpage/CheckoutPage';
 import SignInAndSignUp from './pages/sign-in-sign-up/SignInAndSignUp.jsx';
 import { auth, createUserProfileDocument } from './firebase/firebase.util';
 
@@ -19,7 +20,7 @@ function onAuthStateChange(callback, action) {
         callback(action({ id: snapShot.id, ...snapShot.data() }));
       });
     } else {
-      callback(null);
+      callback(action(null));
     }
   });
 }
@@ -34,14 +35,15 @@ const App = () => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <div>
       <Header />
       <Switch>
         <Route exact path='/' component={HomePage} />
-        <Route exact path='/shop' component={ShopPage} />
+        <Route path='/shop' component={ShopPage} />
+        <Route exact path='/checkout' component={CheckoutPage} />
         <Route
           exact
           path='/signin'

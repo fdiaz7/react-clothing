@@ -9,9 +9,8 @@ import CartDropdown from '../cart-dropdown/CartDropdown';
 import './header.styles.scss';
 import { ReactComponent as Logo } from '../../assets/original.svg';
 const Header = () => {
-  const currentUser = useSelector((state) => state.user);
+  const currentUser = useSelector((state) => state.user.currentUser);
   const hidden = useSelector((state) => state.cart.hidden);
-  console.log(currentUser);
 
   return (
     <div className='header'>
@@ -22,7 +21,9 @@ const Header = () => {
         <Link className='option' to='/shop'>
           SHOP
         </Link>
-        <Link className='option'>CONTACT</Link>
+        <Link className='option' to='/CONTACT'>
+          CONTACT
+        </Link>
         {currentUser ? (
           <div className='option' onClick={() => auth.signOut()}>
             SIGN OUT
